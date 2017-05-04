@@ -3,6 +3,7 @@ package filters
 import javax.inject._
 
 import akka.stream.Materializer
+import play.api.Configuration
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -20,7 +21,8 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class ExampleFilter @Inject()(
     implicit override val mat: Materializer,
-    exec: ExecutionContext) extends Filter {
+    exec: ExecutionContext,
+    conf: Configuration) extends Filter {
 
   override def apply(nextFilter: RequestHeader => Future[Result])
            (requestHeader: RequestHeader): Future[Result] = {
@@ -28,7 +30,7 @@ class ExampleFilter @Inject()(
     // and eventually call the action. Take the result and modify it
     // by adding a new header.
     nextFilter(requestHeader).map { result =>
-      result.withHeaders("X-ExampleFilter" -> "foo")
+      result.withHeaders("X-ExampleFilter" -> "foo", "version" -> conf.getString("version").get)
     }
   }
 
